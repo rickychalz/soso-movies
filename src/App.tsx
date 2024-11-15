@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import { Layout } from "./components/layouts/Layout";
-import GuestHome from "../src/pages/GuestHome"
+import GuestHome from "../src/pages/GuestHome";
 import MovieDetails from "./pages/MovieDetails";
 import TvShowDetails from "./pages/TvShowDetails";
 import AllMedia from "./pages/AllMedia";
@@ -10,7 +10,7 @@ import MediaDetails from "./pages/MediaDetails";
 import LoginPage from "./components/layouts/Auth/LoginPage";
 import Profile from "./pages/Profile";
 import LatestMovies from "./pages/LatestMovies";
-
+import RegisterPage from "./components/layouts/Auth/RegisterPage";
 
 const queryClient = new QueryClient();
 
@@ -19,9 +19,9 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <Router>
         <Routes>
-        <Route path="/login" element={<LoginPage />}></Route>
+          <Route path="/login" element={<LoginPage />}></Route>
+          <Route path="/register" element={<RegisterPage />}></Route>
           <Route path="/" element={<Layout />}>
-
             <Route index element={<GuestHome />}></Route>
             <Route path="/profile" element={<Profile />}></Route>
             <Route path="/latest-movies" element={<LatestMovies />}></Route>

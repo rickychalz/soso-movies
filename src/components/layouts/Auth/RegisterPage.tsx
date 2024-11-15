@@ -1,7 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
-import LoginForm from "./LoginForm";
+import RegisterForm from "./RegisterForm";
 
-const LoginPage = () => {
+const RegisterPage = () => {
     const navigate = useNavigate();
     
     const handleRedirect = () => {
@@ -64,16 +64,16 @@ const LoginPage = () => {
               <div className="flex flex-col justify-between items-center w-full">
                 <div className="text-center font-normal text-2xl mb-6 w-full">
                   {" "}
-                  Login!
+                  Register!
                 </div>
                 <div className="flex flex-col w-full px-8">
-                  <LoginForm onRedirect={handleRedirect}/>
+                  <RegisterForm onRedirect={handleRedirect}/>
                 </div>
                 <div className="text-center flex items-center mt-6 mb-2">
                   {" "}
-                  Don't have an account ?{" "}
-                  <Link to="/register" className="mx-1 underline cursor-pointer font-semibold text-teal-600">
-                    Register!
+                  Already have an account ?{" "}
+                  <Link to="/login" className="mx-1 underline cursor-pointer font-semibold text-teal-600">
+                    Login!
                   </Link>
                 </div>
                 <div className="text-center flex items-center">
@@ -92,4 +92,4 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage;
+export default RegisterPage;

@@ -48,6 +48,36 @@ const MovieDetails = () => {
     fetchMovieDetails();
   }, [id]);
 
+  // Function to handle adding to watchlist
+  const handleAddToWatchlist = async () => {
+    if (!movie) return;
+
+    try {
+      // If you're using a backend API
+      const response = await fetch("/api/watchlist", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id: movie.id,
+          title: movie.title,
+          poster_path: movie.poster_path,
+          release_date: movie.release_date,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to add to watchlist");
+      }
+
+      alert("Added to Watchlist!");
+    } catch (error) {
+      console.error("Error adding to watchlist:", error);
+      alert(error instanceof Error ? error.message : "An error occurred");
+    }
+  };
+
   if (error) return <div>Error: {error}</div>;
   if (!movie) return <div>Loading...</div>;
 
@@ -95,7 +125,10 @@ const MovieDetails = () => {
               <button className="px-6 py-3 bg-teal-600 text-white rounded-lg hover:bg-teal-500 transition-all duration-200 text-center min-w-[160px]">
                 Watch Trailer
               </button>
-              <button className="px-6 py-3 border border-white text-white rounded-lg hover:bg-white hover:text-black transition-all duration-200 text-center min-w-[160px]">
+              <button
+                onClick={handleAddToWatchlist}
+                className="px-6 py-3 border border-white text-white rounded-lg hover:bg-white hover:text-black transition-all duration-200 text-center min-w-[160px]"
+              >
                 Add to Watchlist
               </button>
             </div>
@@ -107,3 +140,4 @@ const MovieDetails = () => {
 };
 
 export default MovieDetails;
+
