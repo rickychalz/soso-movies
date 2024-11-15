@@ -54,7 +54,7 @@ const MovieDetails = () => {
 
     try {
       // If you're using a backend API
-      const response = await fetch("/api/watchlist", {
+      const response = await fetch("http://localhost:8000/api/media/add-to-watchlist", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
