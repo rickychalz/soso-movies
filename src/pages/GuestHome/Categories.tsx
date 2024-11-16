@@ -48,7 +48,7 @@ const MovieTVCategories = () => {
           <span className="text-3xl font-bold">Categories</span>
           <span>See all</span>
         </div>
-        {/* Added container with max-width and proper scrollbar styles */}
+        
         <div className="w-full overflow-hidden">
           <div
             className="flex overflow-x-auto gap-4 pb-6 scrollbar-hide"

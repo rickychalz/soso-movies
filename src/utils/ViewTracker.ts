@@ -27,8 +27,7 @@ type MediaView = {
         viewedAt: new Date().toISOString()
       };
       
-      // Add to history (limit to last 100 views to prevent localStorage from getting too big)
-      const updatedHistory = [...viewHistory, newView].slice(-100);
+      const updatedHistory = [...viewHistory, newView].slice(-50);
       localStorage.setItem('viewHistory', JSON.stringify(updatedHistory));
       
       return true;

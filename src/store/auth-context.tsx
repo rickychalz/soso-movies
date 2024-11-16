@@ -1,4 +1,3 @@
-// src/types/auth.ts
 export interface AuthResponse {
   success: boolean;
   _id: string;

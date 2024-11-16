@@ -1,4 +1,3 @@
-// stores/filter-store.ts
 import { create } from "zustand"
 
 interface FilterState {
