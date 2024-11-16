@@ -1,3 +1,4 @@
+import { recordMediaView } from "@/utils/ViewTracker";
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 
@@ -33,6 +34,17 @@ const TvShowDetails = () => {
   const { id } = useParams<{ id: string }>();
   const [tvShow, setTvShow] = useState<TvShow | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (tvShow) {
+      recordMediaView({
+        id: tvShow.id,
+        title: tvShow.name,
+        type: 'tv'
+      });
+    }
+  }, [tvShow]);
+
 
   useEffect(() => {
     const fetchTvShowDetails = async () => {

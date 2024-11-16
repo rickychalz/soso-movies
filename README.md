@@ -17,10 +17,14 @@ Libraries/Plugins:
 Zustand (state management)
 React Router DOM (navigation)
 Shadcn (UI components)
+ReCharts for graphs
 
-Challenges & Solutions
+Challenges 
 Profile Image Upload: Used Multer for handling file uploads and storing images in a local directory.
 Movie Filtering: Unified data structure for movies and TV shows, ensuring consistent filtering.
 
+
 Known Issues
 Filter Bugs: Filtering sometimes doesn’t update correctly when switching between movie/TV show views.
+incomplete add to wishlist feature
+somehow my mongodb did not want to connect even though the connection was okay

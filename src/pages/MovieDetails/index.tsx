@@ -1,3 +1,4 @@
+import { recordMediaView } from "@/utils/ViewTracker";
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 
@@ -26,6 +27,16 @@ const MovieDetails = () => {
   const { id } = useParams<{ id: string }>();
   const [movie, setMovie] = useState<Movie | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (movie) {
+      recordMediaView({
+        id: movie.id,
+        title: movie.title,
+        type: 'movie'
+      });
+    }
+  }, [movie]);
 
   useEffect(() => {
     const fetchMovieDetails = async () => {

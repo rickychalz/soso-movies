@@ -11,6 +11,7 @@ import LoginPage from "./components/layouts/Auth/LoginPage";
 import Profile from "./pages/Profile";
 import LatestMovies from "./pages/LatestMovies";
 import RegisterPage from "./components/layouts/Auth/RegisterPage";
+import ProtectedRoute from "./utils/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
@@ -23,7 +24,6 @@ function App() {
           <Route path="/register" element={<RegisterPage />}></Route>
           <Route path="/" element={<Layout />}>
             <Route index element={<GuestHome />}></Route>
-            <Route path="/profile" element={<Profile />}></Route>
             <Route path="/latest-movies" element={<LatestMovies />}></Route>
             <Route path="/all-media" element={<AllMedia />}></Route>
             <Route path="/search" element={<SearchResults />} />
@@ -31,6 +31,13 @@ function App() {
             <Route path="/tv/:id" element={<TvShowDetails />} />
             <Route path="/media/:mediaType/:id" element={<MediaDetails />} />
           </Route>
+
+          <Route element={<ProtectedRoute />}>
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/wishlist"  />
+              <Route path="/viewhistory" />
+              <Route path="/update-profile" />
+            </Route>
         </Routes>
       </Router>
     </QueryClientProvider>

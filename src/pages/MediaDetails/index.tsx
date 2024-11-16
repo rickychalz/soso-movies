@@ -22,12 +22,47 @@ interface Media {
   popularity: number;
 }
 
+type MediaView = {
+  id: string;
+  movieId: number | string;
+  title: string;
+  type: 'movie' | 'tv';
+  viewedAt: string;
+};
+
+const recordMediaView = (mediaInfo: {
+  id: number | string;
+  title: string;
+  type: 'movie' | 'tv';
+}) => {
+  try {
+    const storedHistory = localStorage.getItem('viewHistory');
+    const viewHistory: MediaView[] = storedHistory ? JSON.parse(storedHistory) : [];
+    
+    const newView: MediaView = {
+      id: `${mediaInfo.id}-${Date.now()}`,
+      movieId: mediaInfo.id,
+      title: mediaInfo.title,
+      type: mediaInfo.type,
+      viewedAt: new Date().toISOString()
+    };
+    
+    const updatedHistory = [...viewHistory, newView].slice(-100);
+    localStorage.setItem('viewHistory', JSON.stringify(updatedHistory));
+    return true;
+  } catch (error) {
+    console.error('Error recording view:', error);
+    return false;
+  }
+};
+
 const API_KEY = "131625b72ced7cabd70cf8ba3c7fc79e";
 
 const MediaDetails = () => {
   const { id, mediaType } = useParams<{ id: string; mediaType: string }>();
   const [media, setMedia] = useState<Media | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isViewRecorded, setIsViewRecorded] = useState(false);
 
   useEffect(() => {
     const fetchMediaDetails = async () => {
@@ -50,6 +85,21 @@ const MediaDetails = () => {
     fetchMediaDetails();
   }, [id, mediaType]);
 
+  // Record view when media data is loaded
+  useEffect(() => {
+    if (media && !isViewRecorded) {
+      const title = media.title || media.name;
+      if (title) {
+        recordMediaView({
+          id: media.id,
+          title: title,
+          type: mediaType as 'movie' | 'tv'
+        });
+        setIsViewRecorded(true);
+      }
+    }
+  }, [media, mediaType, isViewRecorded]);
+
   if (error) return <div>Error: {error}</div>;
   if (!media) return <div>Loading...</div>;
 
@@ -65,7 +115,7 @@ const MediaDetails = () => {
     >
       {/* Overlay */}
       <div className="absolute inset-0 bg-black opacity-50" />
-
+      
       {/* Content Container */}
       <div className="relative z-10 flex items-center justify-center min-h-screen p-4 md:p-6 lg:p-8">
         <div className="max-w-screen-xl w-full">
@@ -75,22 +125,22 @@ const MediaDetails = () => {
             <div className="w-full lg:w-1/2 text-center lg:text-left">
               <h1 className="text-3xl md:text-4xl font-bold mb-2">{title}</h1>
               <p className="text-lg text-gray-300">{releaseDate}</p>
-
+              
               <div className="mt-6">
                 <p className="text-base md:text-lg leading-relaxed">{media.overview}</p>
               </div>
-
+              
               <div className="mt-6">
                 <h3 className="text-xl font-bold mb-2">Genres:</h3>
                 <p className="text-gray-300">
                   {media.genres?.map((genre) => genre.name).join(", ")}
                 </p>
               </div>
-
+              
               <div className="mt-6">
                 <h3 className="text-xl font-bold mb-2">Rating:</h3>
                 <p className="text-gray-300">
-                  {media.vote_average} ({media.vote_count} votes)
+                  {media.vote_average.toFixed(1)} ({media.vote_count.toLocaleString()} votes)
                 </p>
               </div>
             </div>
