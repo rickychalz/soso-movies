@@ -4,7 +4,7 @@ import { Outlet } from "react-router-dom";
 
 
 
-export const Layout = () => {
+export const GuestLayout = () => {
   return (
     <>
     <div className="flex flex-col h-screen">

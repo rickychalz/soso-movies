@@ -1,8 +1,9 @@
+import { useEffect, useState } from "react";
 import MediaCard from "@/components/custom/MediaCard";
 import Filters from "@/components/custom/Filters";
 import { Sheet, SheetTrigger } from "@/components/ui/sheet";
-import { useEffect, useState } from "react";
 import { useFilterStore } from "@/store/filter-store";
+import useAuthStore from "@/store/auth-context";
 
 interface Media {
   id: number;
@@ -14,43 +15,71 @@ interface Media {
   genre_ids: number[];
 }
 
+interface Genre {
+  id: number;
+  name: string;
+}
+
 const API_KEY = "131625b72ced7cabd70cf8ba3c7fc79e";
 
 const LatestMovies = () => {
   const [movies, setMovies] = useState<Media[]>([]);
   const [filteredMovies, setFilteredMovies] = useState<Media[]>([]);
+  const [genres, setGenres] = useState<Genre[]>([]); // Store genres to map IDs to names
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
 
+  const{isLoggedIn} = useAuthStore();
+
   // Access filter state from Zustand
   const { rating, genre, year } = useFilterStore();
 
-// Fetch movies
-useEffect(() => {
-  const fetchMovies = async (pageNumber: number) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetch(
-        `https://api.themoviedb.org/3/movie/now_playing?api_key=${API_KEY}&language=en-US&page=${pageNumber}`
-      );
-      if (!response.ok) {
-        throw new Error("Failed to fetch movies");
+  // Fetch genres from TMDB to map genre IDs
+  useEffect(() => {
+    const fetchGenres = async () => {
+      try {
+        const response = await fetch(
+          `https://api.themoviedb.org/3/genre/movie/list?api_key=${API_KEY}&language=en-US`
+        );
+        if (!response.ok) {
+          throw new Error("Failed to fetch genres");
+        }
+        const genreData = await response.json();
+        setGenres(genreData.genres);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Error fetching genres");
       }
-      const data = await response.json();
-      const newMovies = data.results;
-      setMovies((prev) => [...prev, ...newMovies]);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred");
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
 
-  fetchMovies(page);
-}, [page]);
+    fetchGenres();
+  }, []);
+
+  // Fetch movies
+  useEffect(() => {
+    const fetchMovies = async (pageNumber: number) => {
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await fetch(
+          `https://api.themoviedb.org/3/movie/now_playing?api_key=${API_KEY}&language=en-US&page=${pageNumber}`
+        );
+        if (!response.ok) {
+          throw new Error("Failed to fetch movies");
+        }
+        const data = await response.json();
+        const newMovies = data.results;
+        setMovies((prev) => [...prev, ...newMovies]);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "An error occurred");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMovies(page);
+  }, [page]);
 
   // Apply filters to movies
   useEffect(() => {
@@ -58,17 +87,26 @@ useEffect(() => {
     if (rating > 0) {
       results = results.filter((movie) => movie.vote_average >= rating);
     }
-    if (genre !== 'all') {
+    if (genre !== "all") {
       results = results.filter((movie) =>
         movie.genre_ids.includes(Number(genre))
       );
     }
-    if (year !== 'all') {
+    if (year !== "all") {
       results = results.filter((movie) => movie.release_date?.startsWith(year));
     }
     setFilteredMovies(results);
   }, [movies, rating, genre, year]);
-  
+
+  // Helper function to get genre names from genreIds
+  const getGenres = (genreIds: number[]) => {
+    return genreIds
+      .map((id) => {
+        const genre = genres.find((g) => g.id === id);
+        return genre ? genre.name : "Unknown";
+      })
+      .join(", ");
+  };
 
   const loadMore = () => {
     setPage((prevPage) => prevPage + 1);
@@ -76,9 +114,9 @@ useEffect(() => {
 
   return (
     <div className="bg-[#121212] h-full">
-      <div className="container mx-auto px-4 py-24">
+      <div className={`container mx-auto  ${isLoggedIn ? 'py-10 px-8' : 'py-24 px-4'}`}>
         <div className="flex flex-col items-start gap-4 sm:gap-0 sm:flex-row sm:items-center justify-between mb-12">
-          <h2 className="text-xl sm:text-3xl font-bold text-gray-500">
+          <h2 className={`text-xl ${isLoggedIn ? 'sm:text-2xl' : 'sm:text-3xl'} font-bold text-gray-500`}>
             Latest Movies
           </h2>
           <Sheet open={open} onOpenChange={setOpen}>
@@ -95,11 +133,13 @@ useEffect(() => {
           {filteredMovies.map((movie) => (
             <MediaCard
               key={movie.id}
-              id={movie.id.toString()}
+              id={movie.id}
               title={movie.title}
               overview={movie.overview}
               posterPath={movie.poster_path}
-              mediaType="movie"
+              genreIds={movie.genre_ids} // Pass genre IDs
+              mediaType="movie" // Specify that this is a movie
+              getGenres={getGenres} // Pass getGenres function
             />
           ))}
         </div>

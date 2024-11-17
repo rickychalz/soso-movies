@@ -1,6 +1,5 @@
-import MovieCard from "@/components/custom/MovieCard";
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import MediaCard from "@/components/custom/MediaCard"; // Import the unified MediaCard
 
 interface Genre {
   id: number;
@@ -31,7 +30,7 @@ interface MovieResponse {
 const API_KEY = "131625b72ced7cabd70cf8ba3c7fc79e";
 
 const PopularMovies = () => {
-  const [latestMovies, setLatestMovies] = useState<Movie[]>([]);
+  const [popularMovies, setPopularMovies] = useState<Movie[]>([]);
   const [genres, setGenres] = useState<Genre[]>([]);
   const [error, setError] = useState<string | null>(null);
 
@@ -51,7 +50,7 @@ const PopularMovies = () => {
 
         const data: MovieResponse = await movieResponse.json();
         // Limit to first 10 movies
-        setLatestMovies(data.results.slice(0, 10));
+        setPopularMovies(data.results.slice(0, 10));
 
         // Fetch genres
         const genreResponse = await fetch(
@@ -66,13 +65,14 @@ const PopularMovies = () => {
         setGenres(genreData.genres);
       } catch (error) {
         setError(error instanceof Error ? error.message : 'An error occurred');
-        console.error("Error fetching the popular movies:", error);
+        console.error("Error fetching popular movies:", error);
       }
     };
 
     fetchPopularMovies();
   }, []);
 
+  // Function to get genres names from genreIds
   const getGenres = (genreIds: number[]) => {
     if (!genres || genres.length === 0) return "No genres available";
 
@@ -85,25 +85,32 @@ const PopularMovies = () => {
   };
 
   return (
-    <div className="py-12 bg-[#121212]">
+    <div className="py-4 bg-[#121212]">
       <div className="flex flex-col items-start mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-0">
         <div className="text-white mb-8 flex items-center justify-between w-full">
-          <span className="text-3xl font-bold">Popular this week</span>
-          <span>See all</span>
+          <span className="text-2xl font-bold">Popular this week</span>
+          <span className="text-teal-500">See all</span>
         </div>
         <div className="w-full overflow-hidden">
-          <div className="flex overflow-x-auto gap-4 pb-6 scrollbar-hide" 
-               style={{
-                 msOverflowStyle: 'none',
-                 scrollbarWidth: 'none',
-                 WebkitOverflowScrolling: 'touch'
-               }}>
-            {latestMovies.map((movie) => (
-              <Link
-              to={`/movies/${movie.id}`}
-            >
-              <MovieCard key={movie.id} movie={movie} getGenres={getGenres} />
-              </Link>
+          <div
+            className="flex overflow-x-auto gap-4 pb-6 scrollbar-hide"
+            style={{
+              msOverflowStyle: 'none',
+              scrollbarWidth: 'none',
+              WebkitOverflowScrolling: 'touch',
+            }}
+          >
+            {popularMovies.map((movie) => (
+              <MediaCard
+                key={movie.id}
+                id={movie.id}
+                title={movie.title}
+                overview={movie.overview}
+                posterPath={movie.poster_path}
+                genreIds={movie.genre_ids}
+                mediaType="movie" // Set mediaType to "movie"
+                getGenres={getGenres} // Pass the getGenres function to map genre IDs to genre names
+              />
             ))}
           </div>
         </div>

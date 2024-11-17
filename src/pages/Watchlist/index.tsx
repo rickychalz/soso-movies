@@ -6,9 +6,10 @@ import { Link } from "react-router-dom";
 interface WatchlistItem {
   _id: string;
   user: string;
-  movieId: string;
-  movieTitle: string;
+  mediaId: string; // ID of the media (movie or TV show)
+  mediaTitle: string; // Title of the movie or TV show
   posterPath: string;
+  mediaType: 'movie' | 'tv'; // Media type (movie or tv)
   createdAt: string;
   updatedAt: string;
 }
@@ -24,19 +25,20 @@ interface WatchlistResponse {
 }
 
 const formatWatchlistItem = (item: WatchlistItem) => ({
-  id: parseInt(item.movieId),
-  title: item.movieTitle,
+  id: parseInt(item.mediaId), // Make sure mediaId is valid and convertible
+  title: item.mediaTitle,
   poster_path: item.posterPath,
-  overview: "",
-  backdrop_path: "",
-  release_date: "",
-  genre_ids: [],
+  overview: "", // Can be extended to fetch overview
+  backdrop_path: "", // Optional: Could fetch the backdrop if necessary
+  release_date: "", // Optional: Could fetch release date for movies or TV shows
+  genre_ids: [], // Optional: Can extend to get genres if needed
   vote_average: 0,
   vote_count: 0,
   popularity: 0,
+  media_type: item.mediaType, // Include the media type (movie or tv)
 });
 
-const MyWatchlist = () => {
+const Watchlist = () => {
   const [watchlist, setWatchlist] = useState<WatchlistItem[]>([]);
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuthStore();
@@ -71,8 +73,7 @@ const MyWatchlist = () => {
     fetchWatchlist();
   }, [user?.token]);
 
-  // Function to retrieve genre names (currently not used, so an empty string is returned)
-  const getGenres = () => "";
+  const getGenres = () => ""; // Can be extended to fetch genres if needed
 
   if (error) {
     return (
@@ -85,11 +86,10 @@ const MyWatchlist = () => {
   }
 
   return (
-    <div className="py-12 bg-[#121212] w-full">
+    <div className="py-10 bg-[#121212] w-full">
       <div className="flex flex-col items-start mx-auto px-4 sm:px-6 lg:px-12">
         <div className="text-white mb-8 flex items-center justify-between w-full">
           <span className="text-2xl font-bold text-gray-500">My Watchlist</span>
-          <Link to="/watchlist"><span className="text-sm text-gray-400">See all</span></Link>
         </div>
 
         <div className="w-full overflow-hidden">
@@ -107,14 +107,17 @@ const MyWatchlist = () => {
               }}
             >
               {watchlist.map((item) => (
-                <Link key={item._id} to={`/media/movie/${item.movieId}`}>
+                <Link
+                  key={item._id}
+                  to={`/media/${item.mediaType}/${item.mediaId}`}
+                >
                   <MediaCard
-                    id={parseInt(item.movieId)} // Pass the movie ID as the 'id'
-                    title={item.movieTitle} // Pass the movie title
-                    overview="" // Default to an empty string for now (could be extended later)
+                    id={parseInt(item.mediaId)} // Ensure correct ID format
+                    title={item.mediaTitle} // Pass the media title
+                    overview={""} // Default to an empty string for now
                     posterPath={item.posterPath} // Pass the poster path
-                    mediaType="movie" // Always pass "movie" since this is a movie watchlist
-                    genreIds={[]} // Default to an empty array since genres are not provided in the watchlist
+                    mediaType={item.mediaType} // Pass the media type (movie or tv)
+                    genreIds={[]} // Default to an empty array since genres are not provided
                     getGenres={getGenres} // Pass the getGenres function
                   />
                 </Link>
@@ -127,4 +130,4 @@ const MyWatchlist = () => {
   );
 };
 
-export default MyWatchlist;
+export default Watchlist;

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import MediaCard from "@/components/custom/MediaCard"; // Import the unified MediaCard
 
 interface Genre {
@@ -86,9 +87,9 @@ const TrendingShows = () => {
 
   return (
     <div className="py-4 bg-[#121212]">
-      <div className="flex flex-col items-start mx-auto max-w-screen-xl overflow-hidden px-4 sm:px-6 lg:px-0">
+      <div className="flex flex-col items-start mx-auto overflow-hidden px-4 sm:px-6 lg:px-8">
         <div className="text-white mb-8 flex items-center justify-between w-full">
-          <span className="text-2xl font-bold">Trending Shows</span>
+          <span className="text-2xl font-bold text-gray-500">Trending Shows</span>
           <span className="text-teal-500">See all</span>
         </div>
         <div className="w-full overflow-hidden">

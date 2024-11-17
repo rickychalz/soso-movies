@@ -1,7 +1,7 @@
-
+import { Link } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import {
-    DropdownMenu,
+  DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
@@ -16,7 +16,7 @@ interface AvatarInfo {
 }
 
 const AvatarProfile = ({ image, username }: AvatarInfo) => {
-    const { logout } = useAuthStore(); // Get authentication state
+  const { logout } = useAuthStore(); // Get authentication state
   return (
     <DropdownMenu>
       <DropdownMenuTrigger>
@@ -28,7 +28,10 @@ const AvatarProfile = ({ image, username }: AvatarInfo) => {
       <DropdownMenuContent className="text-white bg-[#212121] border-[#212121] mr-20">
         <DropdownMenuLabel>My Account</DropdownMenuLabel>
         <DropdownMenuSeparator className="bg-[#121212]" />
-        <DropdownMenuItem>Profile</DropdownMenuItem>
+        <Link to="/profile">
+          {" "}
+          <DropdownMenuItem>Profile</DropdownMenuItem>
+        </Link>
         <DropdownMenuItem>Wishlist</DropdownMenuItem>
         <DropdownMenuItem onClick={logout}>Logout</DropdownMenuItem>
       </DropdownMenuContent>

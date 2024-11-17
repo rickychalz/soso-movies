@@ -1,6 +1,6 @@
-import MovieCard from "@/components/custom/MovieCard";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import MediaCard from "@/components/custom/MediaCard"; // Import the new unified MediaCard
 
 interface Genre {
   id: number;
@@ -40,6 +40,7 @@ const LatestMovies = () => {
       try {
         setError(null);
 
+        // Fetch the latest movies
         const movieResponse = await fetch(
           `https://api.themoviedb.org/3/movie/now_playing?api_key=${API_KEY}&language=en-US&page=1`
         );
@@ -52,6 +53,7 @@ const LatestMovies = () => {
         // Limit to first 10 movies
         setLatestMovies(data.results.slice(0, 10));
 
+        // Fetch genres
         const genreResponse = await fetch(
           `https://api.themoviedb.org/3/genre/movie/list?api_key=${API_KEY}&language=en-US`
         );
@@ -71,6 +73,7 @@ const LatestMovies = () => {
     fetchLatestMovies();
   }, []);
 
+  // Function to get genres names from genreIds
   const getGenres = (genreIds: number[]) => {
     if (!genres || genres.length === 0) return "No genres available";
 
@@ -87,7 +90,9 @@ const LatestMovies = () => {
       <div className="flex flex-col items-start mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-0">
         <div className="text-white mb-8 flex items-center justify-between w-full">
           <span className="text-3xl font-bold">Latest Movies</span>
-          <Link to="/latest-movies">See all</Link>
+          <Link to="/latest-movies" className="text-teal-500">
+            See all
+          </Link>
         </div>
         <div className="w-full overflow-hidden">
           <div
@@ -99,11 +104,16 @@ const LatestMovies = () => {
             }}
           >
             {latestMovies.map((movie) => (
-              <Link
-                to={`/movies/${movie.id}`}
-              >
-               <MovieCard key={movie.id} movie={movie} getGenres={getGenres} />
-              </Link>
+              <MediaCard
+                key={movie.id}
+                id={movie.id}
+                title={movie.title}
+                overview={movie.overview}
+                posterPath={movie.poster_path}
+                genreIds={movie.genre_ids}
+                mediaType="movie" // Always "movie" since this is for movies
+                getGenres={getGenres} // Pass the getGenres function
+              />
             ))}
           </div>
         </div>

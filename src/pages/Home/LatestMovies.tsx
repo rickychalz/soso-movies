@@ -1,14 +1,15 @@
 import { useState, useEffect } from "react";
-import MediaCard from "@/components/custom/MediaCard"; // Import the unified MediaCard
+import { Link } from "react-router-dom";
+import MediaCard from "@/components/custom/MediaCard"; // Import the new unified MediaCard
 
 interface Genre {
   id: number;
   name: string;
 }
 
-interface TVShow {
+interface Movie {
   id: number;
-  name: string;
+  title: string;
   overview: string;
   poster_path: string;
   backdrop_path: string;
@@ -20,41 +21,41 @@ interface TVShow {
   popularity: number;
 }
 
-interface TVShowResponse {
+interface MovieResponse {
   page: number;
-  results: TVShow[];
+  results: Movie[];
   total_results: number;
   total_pages: number;
 }
 
 const API_KEY = "131625b72ced7cabd70cf8ba3c7fc79e";
 
-const TrendingShows = () => {
-  const [trendingShows, setTrendingShows] = useState<TVShow[]>([]);
+const LatestMovies = () => {
+  const [latestMovies, setLatestMovies] = useState<Movie[]>([]);
   const [genres, setGenres] = useState<Genre[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchTrendingShows = async () => {
+    const fetchLatestMovies = async () => {
       try {
         setError(null);
 
-        // Fetch trending TV shows (most popular this week)
-        const showResponse = await fetch(
-          `https://api.themoviedb.org/3/trending/tv/week?api_key=${API_KEY}&language=en-US`
+        // Fetch the latest movies
+        const movieResponse = await fetch(
+          `https://api.themoviedb.org/3/movie/now_playing?api_key=${API_KEY}&language=en-US&page=1`
         );
 
-        if (!showResponse.ok) {
-          throw new Error("Failed to fetch trending shows");
+        if (!movieResponse.ok) {
+          throw new Error("Failed to fetch movies");
         }
 
-        const data: TVShowResponse = await showResponse.json();
-        // Limit to first 10 shows
-        setTrendingShows(data.results.slice(0, 10));
+        const data: MovieResponse = await movieResponse.json();
+        // Limit to first 10 movies
+        setLatestMovies(data.results.slice(0, 10));
 
         // Fetch genres
         const genreResponse = await fetch(
-          `https://api.themoviedb.org/3/genre/tv/list?api_key=${API_KEY}&language=en-US`
+          `https://api.themoviedb.org/3/genre/movie/list?api_key=${API_KEY}&language=en-US`
         );
 
         if (!genreResponse.ok) {
@@ -65,11 +66,11 @@ const TrendingShows = () => {
         setGenres(genreData.genres);
       } catch (error) {
         setError(error instanceof Error ? error.message : "An error occurred");
-        console.error("Error fetching trending shows:", error);
+        console.error("Error fetching the latest movies:", error);
       }
     };
 
-    fetchTrendingShows();
+    fetchLatestMovies();
   }, []);
 
   // Function to get genres names from genreIds
@@ -85,11 +86,13 @@ const TrendingShows = () => {
   };
 
   return (
-    <div className="py-4 bg-[#121212]">
-      <div className="flex flex-col items-start mx-auto max-w-screen-xl overflow-hidden px-4 sm:px-6 lg:px-0">
+    <div className="py-12 bg-[#121212]">
+      <div className="flex flex-col items-start mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8">
         <div className="text-white mb-8 flex items-center justify-between w-full">
-          <span className="text-2xl font-bold">Trending Shows</span>
-          <span className="text-teal-500">See all</span>
+          <span className="text-2xl font-bold text-gray-500">Latest Movies</span>
+          <Link to="/latest-movies" className="text-teal-500">
+            See all
+          </Link>
         </div>
         <div className="w-full overflow-hidden">
           <div
@@ -100,16 +103,16 @@ const TrendingShows = () => {
               WebkitOverflowScrolling: "touch",
             }}
           >
-            {trendingShows.map((show) => (
+            {latestMovies.map((movie) => (
               <MediaCard
-                key={show.id}
-                id={show.id}
-                title={show.name}
-                overview={show.overview}
-                posterPath={show.poster_path}
-                genreIds={show.genre_ids}
-                mediaType="tv" // Always "tv" because this is for TV shows
-                getGenres={getGenres} // Pass the getGenres function to map genre IDs to genre names
+                key={movie.id}
+                id={movie.id}
+                title={movie.title}
+                overview={movie.overview}
+                posterPath={movie.poster_path}
+                genreIds={movie.genre_ids}
+                mediaType="movie" // Always "movie" since this is for movies
+                getGenres={getGenres} // Pass the getGenres function
               />
             ))}
           </div>
@@ -119,4 +122,4 @@ const TrendingShows = () => {
   );
 };
 
-export default TrendingShows;
+export default LatestMovies;

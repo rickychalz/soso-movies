@@ -1,110 +1,135 @@
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
+import useAuthStore from "@/store/auth-context"; // Import auth context
+import { recordMediaView } from "@/utils/ViewTracker";
 
 interface Genre {
   id: number;
   name: string;
 }
 
-interface Media {
+interface Network {
   id: number;
-  title?: string;
-  name?: string;
+  name: string;
+}
+
+interface Movie {
+  id: number;
+  title: string;
   overview: string;
   poster_path: string;
   backdrop_path: string;
-  release_date?: string;
-  first_air_date?: string;
-  genre_ids?: number[];
+  release_date: string;
+  genre_ids: number[];
   genres?: Genre[];
   vote_average: number;
   vote_count: number;
   popularity: number;
 }
 
-type MediaView = {
-  id: string;
-  movieId: number | string;
-  title: string;
-  type: 'movie' | 'tv';
-  viewedAt: string;
-};
-
-const recordMediaView = (mediaInfo: {
-  id: number | string;
-  title: string;
-  type: 'movie' | 'tv';
-}) => {
-  try {
-    const storedHistory = localStorage.getItem('viewHistory');
-    const viewHistory: MediaView[] = storedHistory ? JSON.parse(storedHistory) : [];
-    
-    const newView: MediaView = {
-      id: `${mediaInfo.id}-${Date.now()}`,
-      movieId: mediaInfo.id,
-      title: mediaInfo.title,
-      type: mediaInfo.type,
-      viewedAt: new Date().toISOString()
-    };
-    
-    const updatedHistory = [...viewHistory, newView].slice(-100);
-    localStorage.setItem('viewHistory', JSON.stringify(updatedHistory));
-    return true;
-  } catch (error) {
-    console.error('Error recording view:', error);
-    return false;
-  }
-};
+interface TvShow {
+  id: number;
+  name: string;
+  overview: string;
+  poster_path: string;
+  backdrop_path: string;
+  first_air_date: string;
+  genres?: Genre[];
+  vote_average: number;
+  vote_count: number;
+  popularity: number;
+  number_of_seasons: number;
+  number_of_episodes: number;
+  networks: Network[];
+}
 
 const API_KEY = "131625b72ced7cabd70cf8ba3c7fc79e";
 
-const MediaDetails = () => {
+const Details = () => {
   const { id, mediaType } = useParams<{ id: string; mediaType: string }>();
-  const [media, setMedia] = useState<Media | null>(null);
+  const [media, setMedia] = useState<Movie | TvShow | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [isViewRecorded, setIsViewRecorded] = useState(false);
+  const { user } = useAuthStore(); // Get user from auth store
+  const navigate = useNavigate();
 
+  // Record view for either movie or tv show
+  useEffect(() => {
+    if (media) {
+      recordMediaView({
+        id: media.id,
+        title: mediaType === "movie" ? media.title : media.name,
+        type: mediaType, // Either "movie" or "tv"
+      });
+    }
+  }, [media, mediaType]);
+
+  // Fetch the media details based on the mediaType
   useEffect(() => {
     const fetchMediaDetails = async () => {
       try {
-        if (!id || !mediaType) return;
         setError(null);
-        const mediaResponse = await fetch(
-          `https://api.themoviedb.org/3/${mediaType}/${id}?api_key=${API_KEY}&language=en-US`
-        );
-        if (!mediaResponse.ok) {
-          throw new Error("Failed to fetch media details");
+
+        if (!id) return;
+
+        const endpoint = mediaType === "movie" 
+          ? `https://api.themoviedb.org/3/movie/${id}?api_key=${API_KEY}&language=en-US`
+          : `https://api.themoviedb.org/3/tv/${id}?api_key=${API_KEY}&language=en-US`;
+
+        const response = await fetch(endpoint);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch ${mediaType} details`);
         }
-        const mediaData: Media = await mediaResponse.json();
-        setMedia(mediaData);
+
+        const data = await response.json();
+        setMedia(data);
       } catch (error) {
         setError(error instanceof Error ? error.message : "An error occurred");
         console.error("Error fetching media details:", error);
       }
     };
+
     fetchMediaDetails();
   }, [id, mediaType]);
 
-  // Record view when media data is loaded
-  useEffect(() => {
-    if (media && !isViewRecorded) {
-      const title = media.title || media.name;
-      if (title) {
-        recordMediaView({
-          id: media.id,
-          title: title,
-          type: mediaType as 'movie' | 'tv'
-        });
-        setIsViewRecorded(true);
-      }
+  // Handle adding to watchlist
+  const handleAddToWatchlist = async () => {
+    if (!media) return;
+  
+    // If the user is not logged in, redirect to login page
+    if (!user?.token) {
+      navigate("/login");
+      return;
     }
-  }, [media, mediaType, isViewRecorded]);
+  
+    try {
+      const response = await fetch("http://localhost:8000/api/users/add-to-watchlist", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${user.token}`,
+        },
+        body: JSON.stringify({
+          mediaId: media.id,
+          mediaTitle: mediaType === "movie" ? media.title : media.name,
+          posterPath: media.poster_path,
+          mediaType: mediaType,  // Ensure you send the correct media type
+        }),
+      });
+  
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.message || "Failed to add to watchlist");
+      }
+  
+      alert("Added to Watchlist!");
+    } catch (error) {
+      console.error("Error adding to watchlist:", error);
+      alert(error instanceof Error ? error.message : "An error occurred");
+    }
+  };
 
   if (error) return <div>Error: {error}</div>;
   if (!media) return <div>Loading...</div>;
-
-  const title = media.title || media.name;
-  const releaseDate = media.release_date || media.first_air_date;
 
   return (
     <div
@@ -113,46 +138,74 @@ const MediaDetails = () => {
         backgroundImage: `url(https://image.tmdb.org/t/p/w1280${media.backdrop_path})`,
       }}
     >
-      {/* Overlay */}
       <div className="absolute inset-0 bg-black opacity-50" />
-      
-      {/* Content Container */}
+
       <div className="relative z-10 flex items-center justify-center min-h-screen p-4 md:p-6 lg:p-8">
         <div className="max-w-screen-xl w-full">
-          {/* Main Content Container */}
           <div className="flex flex-col lg:flex-row items-center lg:items-center lg:justify-between w-full text-white space-y-8">
-            {/* Media Details Section */}
             <div className="w-full lg:w-1/2 text-center lg:text-left">
-              <h1 className="text-3xl md:text-4xl font-bold mb-2">{title}</h1>
-              <p className="text-lg text-gray-300">{releaseDate}</p>
-              
+              <h1 className="text-3xl md:text-4xl font-bold mb-2">{mediaType === "movie" ? media.title : media.name}</h1>
+              <p className="text-lg text-gray-300">
+                {mediaType === "movie" ? media.release_date : media.first_air_date}
+              </p>
+
               <div className="mt-6">
                 <p className="text-base md:text-lg leading-relaxed">{media.overview}</p>
               </div>
-              
+
               <div className="mt-6">
                 <h3 className="text-xl font-bold mb-2">Genres:</h3>
                 <p className="text-gray-300">
                   {media.genres?.map((genre) => genre.name).join(", ")}
                 </p>
               </div>
-              
+
               <div className="mt-6">
                 <h3 className="text-xl font-bold mb-2">Rating:</h3>
                 <p className="text-gray-300">
-                  {media.vote_average.toFixed(1)} ({media.vote_count.toLocaleString()} votes)
+                  {media.vote_average} ({media.vote_count} votes)
                 </p>
               </div>
+
+              {mediaType === "tv" && (
+                <div className="mt-6">
+                  <h3 className="text-xl font-bold mb-2">Seasons and Episodes:</h3>
+                  <p className="text-gray-300">
+                    {media.number_of_seasons} Seasons, {media.number_of_episodes} Episodes
+                  </p>
+                </div>
+              )}
+
+              {mediaType === "tv" && (
+                <div className="mt-6">
+                  <h3 className="text-xl font-bold mb-2">Network:</h3>
+                  <p className="text-gray-300">
+                    {media.networks.map((network) => network.name).join(", ")}
+                  </p>
+                </div>
+              )}
             </div>
 
-            {/* Action Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto sm:justify-center lg:justify-start mt-8">
               <button className="px-6 py-3 bg-teal-600 text-white rounded-lg hover:bg-teal-500 transition-all duration-200 text-center min-w-[160px]">
                 Watch Trailer
               </button>
-              <button className="px-6 py-3 border border-white text-white rounded-lg hover:bg-white hover:text-black transition-all duration-200 text-center min-w-[160px]">
-                Add to Watchlist
-              </button>
+
+              {user?.token ? (
+                <button
+                  onClick={handleAddToWatchlist}
+                  className="px-6 py-3 border border-white text-white rounded-lg hover:bg-white hover:text-black transition-all duration-200 text-center min-w-[160px]"
+                >
+                  Add to Watchlist
+                </button>
+              ) : (
+                <button
+                  onClick={() => navigate("/login")}
+                  className="px-6 py-3 border border-white text-white rounded-lg hover:bg-white hover:text-black transition-all duration-200 text-center min-w-[160px]"
+                >
+                  Add to Watchlist
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -161,4 +214,4 @@ const MediaDetails = () => {
   );
 };
 
-export default MediaDetails;
+export default Details;
