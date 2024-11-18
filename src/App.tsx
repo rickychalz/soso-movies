@@ -64,7 +64,7 @@ function App() {
               <Route path="/update-profile" element={<UpdateProfile />} />
               <Route path="/movies" element={<Movies />} />
               <Route path="/tv-shows" element={<TVShows />} />
-              
+
               <Route path="/media/:mediaType/:id" element={<Details />} />
             </Route>
           ) : (

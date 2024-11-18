@@ -10,16 +10,58 @@ import {
 } from "recharts";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import useAuthStore from "@/store/auth-context";
+import ViewsChart from "@/components/custom/Chart";
 
 interface WatchlistResponse {
   success: boolean;
   count: number;
 }
 
+interface TodayStats {
+  tvShowsViewed: number;
+  moviesViewed: number;
+  totalViewed: number;
+}
+
+
+const API_BASE_URL = "http://localhost:8000";
+
+
 const ViewHistory = () => {
   const [watchlistCount, setWatchlistCount] = useState<number>(0);
   const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [stats, setStats] = useState<TodayStats>({
+    tvShowsViewed: 0,
+    moviesViewed: 0,
+    totalViewed: 0
+  });
   const { user } = useAuthStore();
+
+  useEffect(() => {
+    const fetchTodayStats = async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/users/today-stats`, {
+          headers: {
+            Authorization: `Bearer ${user?.token}`,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch today\'s stats');
+        }
+
+        const data = await response.json();
+        setStats(data);
+      } catch (error) {
+        console.error('Error fetching today\'s stats:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchTodayStats();
+  }, []);
 
   useEffect(() => {
     const fetchWatchlistCount = async () => {
@@ -67,7 +109,7 @@ const ViewHistory = () => {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
-                  {0}
+                  {stats.totalViewed}
                 </div>
               </CardContent>
             </Card>
@@ -79,7 +121,7 @@ const ViewHistory = () => {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
-                  {0}
+                  {stats.moviesViewed}
                 </div>
               </CardContent>
             </Card>
@@ -91,7 +133,7 @@ const ViewHistory = () => {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
-                  {0}
+                  {stats.tvShowsViewed}
                 </div>
               </CardContent>
             </Card>
@@ -107,28 +149,7 @@ const ViewHistory = () => {
             </Card>
           </div>
 
-          <div className="h-[400px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart margin={{ left: 0 }}>
-                <XAxis
-                  dataKey="displayDate"
-                  tick={{ fill: "#ffffff" }}
-                  axisLine={{ stroke: "#ffffff" }}
-                  padding={{ left: 0, right: 0 }}
-                />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: "#1e1e1e",
-                    border: "none",
-                    color: "#ffffff",
-                  }}
-                />
-                <Legend />
-                <Bar dataKey="movies" fill="#14b8a6" name="Movies" />
-                <Bar dataKey="tvShows" fill="#0d9488" name="TV Shows" />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
+          <ViewsChart/>
         </CardContent>
       </Card>
     </div>

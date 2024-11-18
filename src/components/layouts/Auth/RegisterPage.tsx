@@ -1,12 +1,65 @@
 import { Link, useNavigate } from "react-router-dom";
 import RegisterForm from "./RegisterForm";
+import { GoogleLogin, CredentialResponse } from "@react-oauth/google";
+import { jwtDecode, JwtPayload } from "jwt-decode";
+import useAuthStore from "@/store/auth-context";
+
+interface DecodedJwt extends JwtPayload {
+  email: string;
+  name: string;
+  picture: string;
+  sub: string;  // Google's unique user ID
+}
 
 const RegisterPage = () => {
     const navigate = useNavigate();
+    const login = useAuthStore((state) => state.login);
     
     const handleRedirect = () => {
         navigate('/'); // Redirect to the home page after login
       };
+
+      const responseMessage = (response: CredentialResponse) => {
+        const { credential } = response;
+    
+        if (!credential) {
+          // Handle the case where credential is undefined
+          console.error("Google login failed: No credential provided");
+          return;
+        }
+    
+        const decoded: DecodedJwt = jwtDecode(credential); // Decode the Google credential JWT
+    
+        // Send the necessary data to your backend API
+        fetch('http://localhost:8000/api/users/google-login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email: decoded.email,
+            name: decoded.name,
+            avatar: decoded.picture,
+            googleId: decoded.sub,  // Google's unique user ID
+          }),
+        })
+          .then((res) => res.json())
+          .then(async (data) => {
+            
+            // Handle success (store the token, navigate, etc.)
+            login(data);
+            console.log(data);
+            handleRedirect();
+          })
+          .catch((error) => {
+            console.error("Google login failed", error);
+          });
+      };
+    
+      const errorMessage = () => {
+        console.error("Google login failed");
+      };
+
   return (
     <>
       <section className="bg-[#121212] text-white">
@@ -32,6 +85,12 @@ const RegisterPage = () => {
                 </div>
                 <div className="flex flex-col w-full px-8">
                   <RegisterForm onRedirect={handleRedirect}/>
+                </div>
+                <div className="my-4">
+                  <GoogleLogin
+                    onSuccess={responseMessage}
+                    onError={errorMessage}
+                  />
                 </div>
                 <div className="text-center flex items-center mt-6 mb-2">
                   {" "}

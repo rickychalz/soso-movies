@@ -30,42 +30,13 @@ const UserInfo = () => {
   }
 
   return (
-    <div className="w-full py-12 px-4 sm:px-6 lg:px-8 text-white">
+    <div className="w-full py-12 px-6 lg:px-8 text-white">
       <div className="flex items-center justify-between w-full">
-        <div className="flex items-center w-full gap-4">
+        <div className="flex flex-col items-start md:flex-row  md:items-center w-full gap-4">
           <div>
             <div className="flex flex-col items-center">
-              <div className="relative w-24 h-24">
-                <label
-                  htmlFor="imageUpload"
-                  className="absolute w-full h-full cursor-pointer rounded-full overflow-hidden border-2 border-gray-300 flex items-center justify-center"
-                >
-                  {image ? (
-                    <>
-                      <img
-                        src={image}
-                        alt="User Avatar"
-                        className="w-full h-full object-cover"
-                      />
-                      <button
-                        type="button"
-                        onClick={handleImageRemove}
-                        className="absolute top-0 right-0 bg-gray-800 text-white rounded-full p-1 text-xs"
-                      >
-                        X
-                      </button>
-                    </>
-                  ) : (
-                    <span className="text-gray-500">Upload</span>
-                  )}
-                </label>
-                <input
-                  id="imageUpload"
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={handleImageChange}
-                />
+              <div className=" relative rounded-full border flex items-center justify-center  w-24 h-24">
+                <img src={`http://localhost:8000/public/temp/${user?.avatar}`} className="rounded-full"/>
               </div>
             </div>
           </div>

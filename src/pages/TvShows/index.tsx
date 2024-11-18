@@ -2,6 +2,10 @@ import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
 import MediaCard from "@/components/custom/MediaCard"; // Import MediaCard from TrendingShows
+import { useFilteredContent } from '@/hooks/use-fiilteredContent';
+import { Sheet, SheetTrigger } from '@/components/ui/sheet';
+import Filters from '@/components/custom/Filters';
+import { useFilterStore } from '@/store/filter-store';
 
 // Types
 interface TVShow {
@@ -14,15 +18,24 @@ interface TVShow {
   genre_ids: number[];
 }
 
+interface Genre {
+  id: number
+  name: string
+}
+
 const API_KEY = "131625b72ced7cabd70cf8ba3c7fc79e";
 
 const TVShows = () => {
   const [shows, setShows] = useState<TVShow[]>([]);
+  const [genres, setGenres] = useState<Genre[]>([])
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(true);
-  const [genres, setGenres] = useState<{ id: number; name: string }[]>([]);
+  const { isFiltersActive, resetFilters } = useFilterStore()
+
+  // Use the filtering hook with the movies data
+  const filteredMovies = useFilteredContent<TVShow>(TVShows)
 
   useEffect(() => {
     const fetchTVShows = async () => {
@@ -80,6 +93,12 @@ const TVShows = () => {
     fetchGenres();
   }, []);
 
+    // Reset page when filters change
+    useEffect(() => {
+      setPage(1)
+      setShows([])
+    }, [isFiltersActive])
+  
   // Function to get genre names from genre IDs
   const getGenres = (genreIds: number[]) => {
     return genreIds
@@ -96,11 +115,40 @@ const TVShows = () => {
     }
   };
 
+  const handleFiltersClose = () => {
+    // If we want to refresh the data when filters are applied
+    setPage(1)
+    setShows([])
+  }
+
   return (
     <div className="min-h-screen bg-[#121212] text-white">
       <div className="container mx-auto px-4 lg:px-8 py-8">
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold mb-8 text-gray-500">All TV Shows</h1>
+          <h1 className="text-2xl font-bold mb-8 text-gray-500">{isFiltersActive ? 'Filtered Movies' : 'All TVShows'}</h1>
+          <div className="flex items-center gap-4">
+            {isFiltersActive && (
+              <Button 
+                variant="ghost" 
+                onClick={() => {
+                  resetFilters()
+                  setPage(1)
+                  setShows([])
+                }}
+                className="text-white hover:text-red-500"
+              >
+                Reset Filters
+              </Button>
+            )}
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button className="bg-teal-600 hover:bg-teal-700">
+                  Filters
+                </Button>
+              </SheetTrigger>
+              <Filters onClose={handleFiltersClose} />
+            </Sheet>
+          </div>
         </div>
 
         {error && (
@@ -110,7 +158,7 @@ const TVShows = () => {
         )}
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-          {shows.map((show) => (
+          {filteredMovies.map((show) => (
             <MediaCard
               key={show.id}
               id={show.id}
@@ -124,10 +172,10 @@ const TVShows = () => {
           ))}
         </div>
 
-        {shows.length === 0 && !loading && (
-          <div className="text-center py-8 text-gray-400">
-            No TV shows found
-          </div>
+        {filteredMovies.length === 0 && !loading && (
+           <div className="text-center py-8 text-gray-400">
+           {isFiltersActive ? 'No shows match your filters' : 'No shows found'}
+         </div>
         )}
 
         {hasMore && (
