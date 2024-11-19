@@ -77,11 +77,11 @@ const Details = () => {
       console.log("View tracked:", data);
     } catch (error) {
       console.error("Error tracking view:", error);
-      // Optionally handle the error - but don't show to user since this is background tracking
+     
     }
   };
   
-  // The useEffect hook remains the same:
+ 
   useEffect(() => {
     const fetchMediaDetails = async () => {
       try {
@@ -120,7 +120,7 @@ const Details = () => {
     };
   
     fetchMediaDetails();
-  }, [id, mediaType]);  // Remove user?.token from the dependencies
+  }, [id, mediaType]);  
 
   const handleAddToWatchlist = async () => {
     if (!media || !user?.token) {
@@ -245,7 +245,7 @@ const Details = () => {
               <button 
                 className="px-6 py-3 bg-teal-600 text-white rounded-lg hover:bg-teal-500 transition-all duration-200 text-center min-w-[160px]"
                 onClick={() => {
-                  // Add trailer functionality here
+                  
                   console.log("Watch trailer clicked");
                 }}
               >

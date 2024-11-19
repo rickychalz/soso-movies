@@ -3,10 +3,11 @@ import { Button } from '@/components/ui/button'
 import { Loader2 } from 'lucide-react'
 import MediaCard from "@/components/custom/MediaCard"
 import { Sheet, SheetTrigger } from '@/components/ui/sheet'
-import Filters from '@/components/custom/Filters'
-import { useFilterStore } from '@/store/filter-store'
-import { useFilteredContent } from '@/hooks/use-fiilteredContent'
+import MovieFilters from '../../components/custom/MovieFilter'
+import { useMovieFilterStore } from '@/store/movie-filter-store'
+import { useFilteredMovies } from '../../hooks/useMovieFilteredContent'
 
+// Types
 interface Movie {
   id: number
   title: string
@@ -16,6 +17,10 @@ interface Movie {
   vote_average: number
   release_date: string
   popularity: number
+  original_language: string
+  adult: boolean
+  vote_count: number
+  production_companies?: { id: number; name: string }[]
 }
 
 interface Genre {
@@ -23,45 +28,143 @@ interface Genre {
   name: string
 }
 
-const API_KEY = "131625b72ced7cabd70cf8ba3c7fc79e";
+const API_KEY = "131625b72ced7cabd70cf8ba3c7fc79e"; 
 
 const Movies = () => {
+  // State
   const [movies, setMovies] = useState<Movie[]>([])
   const [genres, setGenres] = useState<Genre[]>([])
   const [page, setPage] = useState(1)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [hasMore, setHasMore] = useState(true)
-  const { isFiltersActive, resetFilters } = useFilterStore()
-  
- 
-  const filteredMovies = useFilteredContent<Movie>(movies)
 
+  // Get filter state from store
+  const {
+    rating,
+    genre,
+    sortBy,
+    popularity,
+    releaseDateStart,
+    releaseDateEnd,
+    isFiltersActive,
+    includeAdult,
+    originalLanguage,
+    withCast,
+    withCrew,
+    withCompanies,
+    voteCount,
+    withKeywords,
+    resetFilters
+  } = useMovieFilterStore()
+
+  // Get filtered movies
+  const filteredMovies = useFilteredMovies(movies)
+
+  // Fetch genres on mount
   useEffect(() => {
     const fetchGenres = async () => {
       try {
-        const genreResponse = await fetch(
+        const response = await fetch(
           `https://api.themoviedb.org/3/genre/movie/list?api_key=${API_KEY}&language=en-US`
         )
 
-        if (!genreResponse.ok) {
+        if (!response.ok) {
           throw new Error('Failed to fetch genres')
         }
 
-        const genreData = await genreResponse.json()
-        setGenres(genreData.genres)
+        const data = await response.json()
+        setGenres(data.genres)
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred while fetching genres')
       }
     }
 
+    fetchGenres()
+  }, [])
+
+  // Fetch movies when filters or page changes
+  useEffect(() => {
     const fetchMovies = async () => {
       setLoading(true)
       setError(null)
 
       try {
+        // Build query parameters
+        const params = new URLSearchParams({
+          api_key: API_KEY,
+          language: 'en-US',
+          page: page.toString(),
+          include_adult: includeAdult.toString(),
+        })
+
+        // Add sort parameter
+        switch (sortBy) {
+          case 'popularity-desc':
+            params.append('sort_by', 'popularity.desc')
+            break
+          case 'popularity-asc':
+            params.append('sort_by', 'popularity.asc')
+            break
+          case 'rating-desc':
+            params.append('sort_by', 'vote_average.desc')
+            break
+          case 'rating-asc':
+            params.append('sort_by', 'vote_average.asc')
+            break
+          case 'date-desc':
+            params.append('sort_by', 'release_date.desc')
+            break
+          case 'date-asc':
+            params.append('sort_by', 'release_date.asc')
+            break
+          case 'title-asc':
+            params.append('sort_by', 'original_title.asc')
+            break
+          case 'title-desc':
+            params.append('sort_by', 'original_title.desc')
+            break
+          default:
+            params.append('sort_by', 'popularity.desc')
+        }
+
+        // Add filter parameters
+        if (genre !== 'all') {
+          params.append('with_genres', genre)
+        }
+        if (originalLanguage !== 'all') {
+          params.append('with_original_language', originalLanguage)
+        }
+        if (voteCount > 0) {
+          params.append('vote_count.gte', voteCount.toString())
+        }
+        if (rating > 0) {
+          params.append('vote_average.gte', rating.toString())
+        }
+        if (popularity > 0) {
+          params.append('with_popularity.gte', popularity.toString())
+        }
+        if (releaseDateStart) {
+          params.append('primary_release_date.gte', releaseDateStart)
+        }
+        if (releaseDateEnd) {
+          params.append('primary_release_date.lte', releaseDateEnd)
+        }
+        if (withKeywords) {
+          params.append('with_keywords', withKeywords)
+        }
+        if (withCast) {
+          params.append('with_cast', withCast)
+        }
+        if (withCrew) {
+          params.append('with_crew', withCrew)
+        }
+        if (withCompanies) {
+          params.append('with_companies', withCompanies)
+        }
+
         const response = await fetch(
-          `https://api.themoviedb.org/3/discover/movie?api_key=${API_KEY}&language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false&page=${page}`
+          `https://api.themoviedb.org/3/discover/movie?${params.toString()}`
         )
 
         if (!response.ok) {
@@ -73,7 +176,7 @@ const Movies = () => {
         if (page === 1) {
           setMovies(data.results)
         } else {
-          // Remove duplicates when adding new movies
+       
           const newMovies = data.results
           setMovies(prev => {
             const existingIds = new Set(prev.map(movie => movie.id))
@@ -90,9 +193,23 @@ const Movies = () => {
       }
     }
 
-    fetchGenres()
     fetchMovies()
-  }, [page])
+  }, [
+    page,
+    sortBy,
+    genre,
+    originalLanguage,
+    includeAdult,
+    rating,
+    voteCount,
+    popularity,
+    releaseDateStart,
+    releaseDateEnd,
+    withKeywords,
+    withCast,
+    withCrew,
+    withCompanies
+  ])
 
   // Reset page when filters change
   useEffect(() => {
@@ -116,32 +233,31 @@ const Movies = () => {
   }
 
   const handleFiltersClose = () => {
-    // If we want to refresh the data when filters are applied
     setPage(1)
     setMovies([])
   }
 
-  // Debug logging
-  console.log('Movies count:', movies.length)
-  console.log('Filtered movies count:', filteredMovies.length)
-  console.log('Filters active:', isFiltersActive)
+  const handleResetFilters = () => {
+    resetFilters()
+    setPage(1)
+    setMovies([])
+  }
 
   return (
     <div className="min-h-screen bg-[#121212] text-white">
       <div className="container mx-auto px-4 lg:px-8 py-8">
-        <div className='flex items-center justify-between'>
-          <h1 className="text-2xl font-bold mb-8 text-gray-500">
+        {/* Header */}
+        <div className='flex items-center justify-between mb-8'>
+          <h1 className="text-2xl font-bold text-gray-500">
             {isFiltersActive ? 'Filtered Movies' : 'All Movies'}
           </h1>
+          
+          {/* Filter Controls */}
           <div className="flex items-center gap-4">
             {isFiltersActive && (
               <Button 
                 variant="ghost" 
-                onClick={() => {
-                  resetFilters()
-                  setPage(1)
-                  setMovies([])
-                }}
+                onClick={handleResetFilters}
                 className="text-white hover:text-red-500"
               >
                 Reset Filters
@@ -153,17 +269,19 @@ const Movies = () => {
                   Filters
                 </Button>
               </SheetTrigger>
-              <Filters onClose={handleFiltersClose} />
+              <MovieFilters onClose={handleFiltersClose} />
             </Sheet>
           </div>
         </div>
 
+        {/* Error Message */}
         {error && (
           <div className="text-red-500 text-center py-4">
             {error}
           </div>
         )}
 
+        {/* Movie Grid */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
           {filteredMovies.map((movie) => (
             <MediaCard
@@ -179,12 +297,14 @@ const Movies = () => {
           ))}
         </div>
 
+        {/* Empty State */}
         {filteredMovies.length === 0 && !loading && (
           <div className="text-center py-8 text-gray-400">
             {isFiltersActive ? 'No movies match your filters' : 'No movies found'}
           </div>
         )}
 
+        {/* Load More Button */}
         {hasMore && !isFiltersActive && (
           <div className="flex justify-center mt-8">
             <Button

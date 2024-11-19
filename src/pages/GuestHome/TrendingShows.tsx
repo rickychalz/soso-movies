@@ -108,8 +108,8 @@ const TrendingShows = () => {
                 overview={show.overview}
                 posterPath={show.poster_path}
                 genreIds={show.genre_ids}
-                mediaType="tv" // Always "tv" because this is for TV shows
-                getGenres={getGenres} // Pass the getGenres function to map genre IDs to genre names
+                mediaType="tv" 
+                getGenres={getGenres} 
               />
             ))}
           </div>

@@ -16,19 +16,19 @@ const RegisterPage = () => {
     const login = useAuthStore((state) => state.login);
     
     const handleRedirect = () => {
-        navigate('/'); // Redirect to the home page after login
+      navigate('/wait-verification', );// Redirect to the home page after login
       };
 
       const responseMessage = (response: CredentialResponse) => {
         const { credential } = response;
     
         if (!credential) {
-          // Handle the case where credential is undefined
+         
           console.error("Google login failed: No credential provided");
           return;
         }
     
-        const decoded: DecodedJwt = jwtDecode(credential); // Decode the Google credential JWT
+        const decoded: DecodedJwt = jwtDecode(credential); 
     
         // Send the necessary data to your backend API
         fetch('http://localhost:8000/api/users/google-login', {

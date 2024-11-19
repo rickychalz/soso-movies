@@ -1,9 +1,9 @@
-import { ReactNode } from "react"; // Import ReactNode to define the type for children
-import useAuthStore from "@/store/auth-context"; // Your auth store
-import { Navigate } from "react-router-dom"; // React Router components
+import { ReactNode } from "react"; 
+import useAuthStore from "@/store/auth-context"; 
+import { Navigate } from "react-router-dom"; 
 
 interface ProtectedRouteProps {
-  children: ReactNode; // Type the 'children' prop as ReactNode (the type of all valid JSX elements)
+  children: ReactNode; 
 }
 
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {

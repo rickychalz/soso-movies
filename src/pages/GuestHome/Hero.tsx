@@ -2,10 +2,10 @@ import { useState, useEffect } from "react";
 import useEmblaCarousel from "embla-carousel-react";
 import Autoplay from "embla-carousel-autoplay";
 
-// Set your TMDB API key here
+
 const API_KEY = "131625b72ced7cabd70cf8ba3c7fc79e";
 
-// Define the type for the slide data
+
 type Slide = {
   title: string;
   image: string;
@@ -37,7 +37,7 @@ const Hero = () => {
           `https://api.themoviedb.org/3/trending/movie/day?api_key=${API_KEY}`
         );
         const data = await response.json();
-        const trendingMovies = data.results.slice(0, 5); // Get only the first 5 movies
+        const trendingMovies = data.results.slice(0, 5); 
 
         // Fetch additional data for each movie
         const movieDetailsPromises = trendingMovies.map(async (movie: any) => {
@@ -47,7 +47,7 @@ const Hero = () => {
           const movieDetails = await movieDetailsResponse.json();
 
           const genres = movieDetails.genres.map((genre: any) => genre.name);
-          const duration = movieDetails.runtime || null; // Duration might be null for TV shows
+          const duration = movieDetails.runtime || null; 
           const description =
             movieDetails.overview || "No description available.";
           const category = movieDetails.tv_show ? "TV Show" : "Movie";
@@ -65,7 +65,7 @@ const Hero = () => {
           };
         });
 
-        // Wait for all movie details to be fetched
+       
         const movieDetails = await Promise.all(movieDetailsPromises);
         setSlidesData(movieDetails);
       } catch (error) {
@@ -78,7 +78,7 @@ const Hero = () => {
 
   useEffect(() => {
     if (emblaApi) {
-      console.log(emblaApi.slideNodes()); // Access API
+      console.log(emblaApi.slideNodes()); 
     }
   }, [emblaApi]);
 

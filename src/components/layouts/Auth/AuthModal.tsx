@@ -9,7 +9,7 @@ import Register from "./Register";
 import { useNavigate } from "react-router-dom";
 
 interface AuthModalProps {
-  onClose: () => void;  // Add onClose prop to close the modal
+  onClose: () => void;  
 }
 
 export const AuthModal = ({  onClose = () => {} }: AuthModalProps) => {
@@ -17,8 +17,8 @@ export const AuthModal = ({  onClose = () => {} }: AuthModalProps) => {
   const navigate = useNavigate();
 
   const handleRedirect = () => {
-    onClose(); // Close the modal
-    navigate("/"); // Redirect to "/"
+    onClose(); 
+    navigate("/"); 
   };
 
   const renderCurrentPage = () => {
@@ -28,16 +28,16 @@ export const AuthModal = ({  onClose = () => {} }: AuthModalProps) => {
           <Login
             onRegister={() => setCurrentPage("register")}
             onForgotPassword={() => setCurrentPage("forgot-password")}
-            onClose={onClose}  // Pass onClose to Login
-            onRedirect={handleRedirect}  // Pass handleRedirect to Login
+            onClose={onClose} 
+            onRedirect={handleRedirect} 
           />
         );
       case "register":
         return (
           <Register
             onLogin={() => setCurrentPage("login")}
-            onClose={onClose}  // Pass onClose to Register
-            onRedirect={handleRedirect}  // Pass handleRedirect to Register
+            onClose={onClose} 
+            onRedirect={handleRedirect}  
           />
         );
       default:

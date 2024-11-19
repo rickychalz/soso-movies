@@ -108,8 +108,8 @@ const PopularMovies = () => {
                 overview={movie.overview}
                 posterPath={movie.poster_path}
                 genreIds={movie.genre_ids}
-                mediaType="movie" // Set mediaType to "movie"
-                getGenres={getGenres} // Pass the getGenres function to map genre IDs to genre names
+                mediaType="movie" 
+                getGenres={getGenres} 
               />
             ))}
           </div>

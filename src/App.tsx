@@ -23,6 +23,8 @@ import TVShows from "./pages/TvShows";
 import Details from "./pages/MediaDetails";
 import Watchlist from "./pages/Watchlist";
 import UpdateProfile from "./pages/UpdateProfile";
+import VerifyEmail from "./pages/VerifyEmail";
+import WaitVerification from "./pages/WaitVerification";
 
 const queryClient = new QueryClient();
 
@@ -34,6 +36,18 @@ function App() {
       <Router>
         <Routes>
           {/* Auth routes - accessible when logged out */}
+          <Route
+            path="/email-verification"
+            element={
+              isLoggedIn ? <Navigate to="/dashboard" replace /> : <VerifyEmail />
+            }
+          />
+          <Route
+            path="/wait-verification"
+            element={
+              isLoggedIn ? <Navigate to="/dashboard" replace /> : <WaitVerification />
+            }
+          />
           <Route
             path="/login"
             element={

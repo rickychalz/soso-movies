@@ -20,10 +20,10 @@ const RegisterForm = ({ onClose, onRedirect }: { onClose?: () => void; onRedirec
   
       try {
         const response = await authService.register({ username, email, password });
-        login(response);
+        //login(response);
   
-        if (onClose) onClose();       // Close modal
-        if (onRedirect) onRedirect();  // Redirect if provided
+        if (onClose) onClose();       
+        if (onRedirect) onRedirect();  
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred');
       } finally {

@@ -6,10 +6,10 @@ import { Link } from "react-router-dom";
 interface WatchlistItem {
   _id: string;
   user: string;
-  mediaId: string; // ID of the media (movie or TV show)
-  mediaTitle: string; // Title of the movie or TV show
+  mediaId: string; 
+  mediaTitle: string; 
   posterPath: string;
-  mediaType: 'movie' | 'tv'; // Media type (movie or tv)
+  mediaType: 'movie' | 'tv'; 
   createdAt: string;
   updatedAt: string;
 }
@@ -25,17 +25,17 @@ interface WatchlistResponse {
 }
 
 const formatWatchlistItem = (item: WatchlistItem) => ({
-  id: parseInt(item.mediaId), // Make sure mediaId is valid and convertible
+  id: parseInt(item.mediaId), 
   title: item.mediaTitle,
   poster_path: item.posterPath,
-  overview: "", // Can be extended to fetch overview
-  backdrop_path: "", // Optional: Could fetch the backdrop if necessary
-  release_date: "", // Optional: Could fetch release date for movies or TV shows
-  genre_ids: [], // Optional: Can extend to get genres if needed
+  overview: "", 
+  backdrop_path: "", 
+  release_date: "", 
+  genre_ids: [], 
   vote_average: 0,
   vote_count: 0,
   popularity: 0,
-  media_type: item.mediaType, // Include the media type (movie or tv)
+  media_type: item.mediaType, 
 });
 
 const Watchlist = () => {
@@ -73,7 +73,7 @@ const Watchlist = () => {
     fetchWatchlist();
   }, [user?.token]);
 
-  const getGenres = () => ""; // Can be extended to fetch genres if needed
+  const getGenres = () => ""; 
 
   if (error) {
     return (
@@ -112,13 +112,13 @@ const Watchlist = () => {
                   to={`/media/${item.mediaType}/${item.mediaId}`}
                 >
                   <MediaCard
-                    id={parseInt(item.mediaId)} // Ensure correct ID format
-                    title={item.mediaTitle} // Pass the media title
-                    overview={""} // Default to an empty string for now
-                    posterPath={item.posterPath} // Pass the poster path
-                    mediaType={item.mediaType} // Pass the media type (movie or tv)
-                    genreIds={[]} // Default to an empty array since genres are not provided
-                    getGenres={getGenres} // Pass the getGenres function
+                    id={parseInt(item.mediaId)} 
+                    title={item.mediaTitle} 
+                    overview={""} 
+                    posterPath={item.posterPath} 
+                    mediaType={item.mediaType} 
+                    genreIds={[]} 
+                    getGenres={getGenres}
                   />
                 </Link>
               ))}

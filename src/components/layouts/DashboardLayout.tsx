@@ -17,7 +17,7 @@ export function Layout() {
     e.preventDefault();
     if (query.trim()) {
       navigate(`/search?query=${query}`);
-      setQuery(""); // Clear the search input after submitting
+      setQuery(""); 
     }
   };
 

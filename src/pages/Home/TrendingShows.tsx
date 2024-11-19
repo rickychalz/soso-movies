@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
 import MediaCard from "@/components/custom/MediaCard"; // Import the unified MediaCard
 
 interface Genre {
@@ -109,8 +108,8 @@ const TrendingShows = () => {
                 overview={show.overview}
                 posterPath={show.poster_path}
                 genreIds={show.genre_ids}
-                mediaType="tv" // Always "tv" because this is for TV shows
-                getGenres={getGenres} // Pass the getGenres function to map genre IDs to genre names
+                mediaType="tv" 
+                getGenres={getGenres} 
               />
             ))}
           </div>

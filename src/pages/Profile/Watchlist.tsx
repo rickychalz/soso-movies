@@ -109,13 +109,13 @@ const MyWatchlist = () => {
               {watchlist.map((item) => (
                 <Link key={item._id} to={`/media/movie/${item.movieId}`}>
                   <MediaCard
-                    id={parseInt(item.movieId)} // Pass the movie ID as the 'id'
-                    title={item.movieTitle} // Pass the movie title
-                    overview="" // Default to an empty string for now (could be extended later)
-                    posterPath={item.posterPath} // Pass the poster path
-                    mediaType="movie" // Always pass "movie" since this is a movie watchlist
-                    genreIds={[]} // Default to an empty array since genres are not provided in the watchlist
-                    getGenres={getGenres} // Pass the getGenres function
+                    id={parseInt(item.movieId)} 
+                    title={item.movieTitle} 
+                    overview="" 
+                    posterPath={item.posterPath} 
+                    mediaType="movie" 
+                    genreIds={[]} 
+                    getGenres={getGenres} 
                   />
                 </Link>
               ))}

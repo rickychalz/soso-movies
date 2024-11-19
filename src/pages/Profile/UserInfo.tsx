@@ -1,60 +1,54 @@
 import useAuthStore from "@/store/auth-context";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-// Adjust path if needed
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 const UserInfo = () => {
-  const { user, isLoggedIn } = useAuthStore(); // Accessing user and login state from the store
-  const [image, setImage] = useState<string | null>(null);
+  const { user, isLoggedIn } = useAuthStore();
+  const [image, setImage] = useState(null);
 
-  // Set the avatar as the image if available
   useEffect(() => {
     if (user?.avatar) {
-      setImage(user.avatar);
-    }
+      setImage(user.avatar);  
+    }  
   }, [user]);
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files ? e.target.files[0] : null;
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = () => setImage(reader.result as string); // Cast the result as string
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handleImageRemove = () => setImage(null); // Remove the image
-
-  if (!isLoggedIn) {
-    return <div>Please log in to view your profile.</div>; // Fallback if user is not logged in
-  }
-
   return (
-    <div className="w-full py-12 px-6 lg:px-8 text-white">
-      <div className="flex items-center justify-between w-full">
-        <div className="flex flex-col items-start md:flex-row  md:items-center w-full gap-4">
-          <div>
-            <div className="flex flex-col items-center">
-              <div className=" relative rounded-full border flex items-center justify-center  w-24 h-24">
-                <img src={`http://localhost:8000/public/temp/${user?.avatar}`} className="rounded-full"/>
-              </div>
-            </div>
-          </div>
-          <div className="flex flex-col">
-            <div className="text-xl">{user?.username}</div>
-            <div className="text-lg font-light">{user?.email}</div>
-          </div>
-        </div>
-        <Link to="/update-profile">
-          <button
-            className="bg-teal-600 px-4 py-2 rounded-lg text-white"
-          >
-            Edit
-          </button>
-        </Link>
+    <div className="flex flex-col items-center space-y-4 p-6">
+      <Avatar className="w-24 h-24">
+        <AvatarImage 
+          src={`http://localhost:8000/public/temp/${user?.avatar}`} 
+          alt={`${user?.username}'s avatar`} 
+        />
+        <AvatarFallback className="bg-teal-600 text-white text-3xl">
+          {user?.username ? user.username.charAt(0).toUpperCase() : 'U'}
+        </AvatarFallback>
+      </Avatar>
+
+      <div className="text-center">
+        <h2 className="text-xl font-bold text-white">{user?.username}</h2>
+        <p className="text-muted-foreground">{user?.email}</p>
       </div>
+
+      <div className="flex flex-wrap gap-2 justify-center">
+        {user?.favoriteGenres && user.favoriteGenres.length > 0 ? ( 
+          user.favoriteGenres.map((genre) => (  
+            <Badge key={genre.id} className="bg-teal-600/20 text-teal-400 hover:bg-teal-600/30">{genre.name}</Badge>
+          )) 
+        ) : ( 
+          <p className="text-muted-foreground"></p>
+        )} 
+      </div>
+      
+      <Link 
+        to="/update-profile" 
+        className="mt-4 inline-block px-4 py-2 bg-teal-600 text-primary-foreground rounded-md hover:bg-teal-700"
+      >
+        Edit Profile
+      </Link>
     </div>
   );
-};
+}; 
 
 export default UserInfo;

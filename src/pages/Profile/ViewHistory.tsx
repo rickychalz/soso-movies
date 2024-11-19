@@ -1,13 +1,4 @@
 import { useState, useEffect } from "react";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from "recharts";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import useAuthStore from "@/store/auth-context";
 import ViewsChart from "@/components/custom/Chart";
@@ -148,7 +139,6 @@ const ViewHistory = () => {
               </CardContent>
             </Card>
           </div>
-
           <ViewsChart/>
         </CardContent>
       </Card>

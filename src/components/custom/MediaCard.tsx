@@ -2,13 +2,13 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 
 interface MediaCardProps {
-  id: number; // ID of the movie or TV show
+  id: number; 
   title: string;
   overview: string;
   posterPath: string;
   genreIds: number[];
-  mediaType: 'movie' | 'tv'; // Determines if it's a movie or a TV show
-  getGenres: (genreIds: number[]) => string; // Function to get genre names based on genre IDs
+  mediaType: 'movie' | 'tv'; 
+  getGenres: (genreIds: number[]) => string; 
 }
 
 const MediaCard: React.FC<MediaCardProps> = ({
@@ -24,13 +24,13 @@ const MediaCard: React.FC<MediaCardProps> = ({
   const mediaLink = `/media/${mediaType}/${id}`;
   // Determine if it is a movie or a TV show
   const mediaTitle = mediaType === 'movie' ? title : title;
-  const releaseDate = mediaType === 'movie' ? 'Release Date' : 'First Air Date'; // You can dynamically add dates if available
+  const releaseDate = mediaType === 'movie' ? 'Release Date' : 'First Air Date';
   const mediaOverview = overview || "No description available."; 
 
   return (
     <Link
       to={mediaLink}
-      className="group relative block bg-black rounded-xl h-[250px] w-[150px] sm:h-[300px] sm:w-[200px] flex-shrink-0 overflow-hidden"
+      className="group relative block bg-black rounded-xl h-[250px] w-full sm:h-[300px] sm:w-[210px] flex-shrink-0 overflow-hidden"
     >
       {/* Poster Image */}
       <img

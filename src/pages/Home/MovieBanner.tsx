@@ -5,13 +5,13 @@ import Autoplay from "embla-carousel-autoplay";
 // Set your TMDB API key here
 const API_KEY = "131625b72ced7cabd70cf8ba3c7fc79e";
 
-// Define the type for the slide data
+
 type Slide = {
   title: string;
   image: string;
   genres: string[];
   releaseYear: string;
-  duration: number | null; // Duration can be null for TV shows
+  duration: number | null; 
   description: string;
   category: string;
 };
@@ -38,7 +38,7 @@ const Hero = () => {
           const movieDetails = await movieDetailsResponse.json();
 
           const genres = movieDetails.genres.map((genre: any) => genre.name);
-          const duration = movieDetails.runtime || null; // Duration might be null for TV shows
+          const duration = movieDetails.runtime || null; 
           const description =
             movieDetails.overview || "No description available.";
           const category = movieDetails.tv_show ? "TV Show" : "Movie";
@@ -69,7 +69,7 @@ const Hero = () => {
 
   useEffect(() => {
     if (emblaApi) {
-      console.log(emblaApi.slideNodes()); // Access API
+      console.log(emblaApi.slideNodes());
     }
   }, [emblaApi]);
 

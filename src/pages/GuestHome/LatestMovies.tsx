@@ -111,8 +111,8 @@ const LatestMovies = () => {
                 overview={movie.overview}
                 posterPath={movie.poster_path}
                 genreIds={movie.genre_ids}
-                mediaType="movie" // Always "movie" since this is for movies
-                getGenres={getGenres} // Pass the getGenres function
+                mediaType="movie" 
+                getGenres={getGenres}
               />
             ))}
           </div>

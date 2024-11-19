@@ -4,7 +4,9 @@ export interface AuthResponse {
   username: string;
   email: string;
   avatar: string;
+  favoriteGenres:[],
   token: string;
+  isNewUser:boolean;
 }
 
 export interface User {
@@ -12,7 +14,9 @@ export interface User {
   username: string;
   email: string;
   avatar: string;
+  favoriteGenres:[],
   token: string;
+  isNewUser:boolean;
 }
 
 export interface AuthState {
@@ -42,7 +46,9 @@ const useAuthStore = create<AuthState>()(
           username: userData.username,
           email: userData.email,
           avatar: userData.avatar,
+          favoriteGenres:userData.favoriteGenres,
           token: userData.token,
+          isNewUser:userData.isNewUser,
         }
       }),
       logout: () => set({

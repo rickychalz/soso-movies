@@ -20,8 +20,8 @@ const LoginForm = ({ onClose, onRedirect }: { onClose?: () => void; onRedirect?:
         const response = await authService.login({ email, password });
         login(response);
   
-        if (onClose) onClose();       // Close modal
-        if (onRedirect) onRedirect();  // Redirect if provided
+        if (onClose) onClose();      
+        if (onRedirect) onRedirect();  
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred');
       } finally {
